@@ -1,5 +1,6 @@
 package tymoteusz.kunicki;
 
+import java.util.Random;
 import java.util.Scanner;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -41,20 +42,47 @@ class Philosopher extends Thread {
     }
 
     @Override
+
+
     public void run() {
+        Random random = new Random();
+
         try {
             while (running) {
                 think();
-                leftFork.pickUp();
-                try {
-                    rightFork.pickUp();
+
+                if (random.nextBoolean()) {
+                    // Najpierw lewy widelec
+                    leftFork.pickUp();
+
+                    Thread.sleep(500);
+
                     try {
-                        eat();
+                        rightFork.pickUp();
+                        try {
+                            eat();
+                        } finally {
+                            rightFork.putDown();
+                        }
+                    } finally {
+                        leftFork.putDown();
+                    }
+                } else {
+                    // Najpierw prawy widelec
+                    rightFork.pickUp();
+
+                    Thread.sleep(500);
+
+                    try {
+                        leftFork.pickUp();
+                        try {
+                            eat();
+                        } finally {
+                            leftFork.putDown();
+                        }
                     } finally {
                         rightFork.putDown();
                     }
-                } finally {
-                    leftFork.putDown();
                 }
             }
         } catch (InterruptedException e) {
